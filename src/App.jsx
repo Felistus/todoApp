@@ -66,7 +66,15 @@ function App() {
       setDispayTodoArray([...todoArray]);
     }
   }
-
+  function handleDeleteClick() {
+    return todoArray.map((item) => {
+      if (item.completed) {
+        setTodoArray(todoArray.filter((item) => !item.completed));
+      } else {
+        setTodoArray(todoArray.filter((item) => item.active));
+      }
+    });
+  }
   const listTodoItems = dispayTodoArray.map((item, index) => {
     return (
       <div
@@ -226,7 +234,9 @@ function App() {
                   </span>
                 </label>
               </div>
-              <div className="cursor-pointer">clear completed</div>
+              <div onClick={handleDeleteClick} className="cursor-pointer">
+                clear completed
+              </div>
             </div>
           </div>
         </div>
