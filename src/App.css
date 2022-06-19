@@ -1,0 +1,14 @@
+.checkbox {
+  display: inline-block;
+  height: 20px;
+  width: 20px;
+  border: 1px #777a92 solid;
+  border-radius: 100%;
+  cursor: pointer;
+}
+
+.checkbox--active {
+  border: 1px #777a92 solid;
+  background: linear-gradient(hsl(192, 100%, 67%), hsl(280, 87%, 65%));
+  border-radius: 100%;
+}
