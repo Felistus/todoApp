@@ -8,7 +8,9 @@ import "react-toastify/dist/ReactToastify.css";
 import DeleteIcon from "./components/icons/DeleteIcon";
 
 function App() {
-  const existingTodoItems = JSON.parse(localStorage.getItem("todoItem"));
+  const existingTodoItems = JSON.parse(
+    localStorage.getItem("todoItem") || "[]"
+  );
   const [checkedTheme, setCheckedTheme] = useState(true);
   const [checkActive, setCheckActive] = useState(false);
   const [checkCompleted, setCheckCompleted] = useState(false);
