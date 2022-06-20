@@ -1,3 +1,5 @@
+
+
 .checkbox {
   display: inline-block;
   height: 20px;
@@ -7,8 +9,17 @@
   cursor: pointer;
 }
 
-.checkbox--active {
+.checkbox-active {
   border: 1px #777a92 solid;
   background: linear-gradient(hsl(192, 100%, 67%), hsl(280, 87%, 65%));
   border-radius: 100%;
+}
+
+.customScroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.customScroll::-webkit-scrollbar-thumb {
+  background: #525861;
+  border-radius: 8px;
 }

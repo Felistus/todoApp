@@ -3,10 +3,12 @@ import SunIcon from "./components/icons/SunIcon";
 import MoonIcon from "./components/icons/MoonIcon";
 import { useState, useEffect } from "react";
 import { useMemo } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import DeleteIcon from "./components/icons/DeleteIcon";
 
 function App() {
   const existingTodoItems = JSON.parse(localStorage.getItem("todoItem"));
-  const [isChecked, setIsChecked] = useState(false);
   const [checkedTheme, setCheckedTheme] = useState(true);
   const [checkActive, setCheckActive] = useState(false);
   const [checkCompleted, setCheckCompleted] = useState(false);
@@ -15,7 +17,9 @@ function App() {
   const [item, setItem] = useState("");
   const [todoArray, setTodoArray] = useState([...existingTodoItems]);
   const [dispayTodoArray, setDispayTodoArray] = useState([...todoArray]);
-
+  const [isChecked, setIsChecked] = useState(
+    new Array(todoArray.length).fill(false)
+  );
   function setTheme() {
     if (pageTheme === "dark") {
       setPageTheme("light");
@@ -25,18 +29,38 @@ function App() {
       localStorage.setItem("theme", "dark");
     }
   }
+  function handleIsChecked(position) {
+    const updatedNewCheckedState = isChecked.map((state, index) => {
+      return index === position ? !state : state;
+    });
+    setIsChecked(updatedNewCheckedState);
+
+    const updatedTodoArray = todoArray.map((item, index) => {
+      return index === position
+        ? { ...item, completed: true, active: false }
+        : item;
+    });
+    setTodoArray(updatedTodoArray);
+  }
   function handleInputChange(e) {
     setItem(e.target.value);
   }
   function handleSubmit(event) {
     event.preventDefault();
-    const todoItem = {
-      task: item,
-      completed: false,
-      active: true,
-    };
-    setTodoArray([...todoArray, todoItem]);
-    setItem("");
+    if (item) {
+      try {
+        const todoItem = {
+          task: item,
+          completed: false,
+          active: true,
+        };
+        setTodoArray([...todoArray, todoItem]);
+        setItem("");
+        toast.success("Task added successfully");
+      } catch (error) {
+        toast.error("Something went wrong, please try again");
+      }
+    } else toast.warning("Please enter a task");
   }
   const activeTasksLeft = useMemo(() => {
     return todoArray.filter((item) => item.active);
@@ -75,43 +99,75 @@ function App() {
       }
     });
   }
-  const listTodoItems = dispayTodoArray.map((item, index) => {
-    return (
-      <div
-        key={index}
-        className=" text-[#fafafa] w-full p-3 border-b-[1px] border-[#777a92]"
+  function handleSingleTaskDelete(position) {
+    const arrayAfterSingleTaskDelete = todoArray.filter((item, index) => {
+      return index !== position;
+    });
+    setTodoArray(arrayAfterSingleTaskDelete);
+  }
+  const listTodoItems = dispayTodoArray.map((item, index) => (
+    <div
+      key={index}
+      className={
+        `${
+          item.completed
+            ? "cursor-not-allowed"
+            : "hover:bg-[#e4e5f1] hover:text-[#161722]"
+        }` +
+        " text-[#fafafa] w-full p-3 border-b-[1px] border-[#777a92] inline-flex justify-between"
+      }
+    >
+      <label
+        className={
+          `${item.completed ? " cursor-not-allowed " : ""}` +
+          "flex items-center space-x-2 "
+        }
       >
-        <label className="flex items-center space-x-2 ">
-          <svg
-            className={
-              `${isChecked ? " checkbox--active " : ""}` + " checkbox "
-            }
-            aria-hidden="true"
-            viewBox="0 0 15 11"
-            fill="none"
-          >
-            <path
-              d="M1 4.5L5 9L14 1"
-              strokeWidth="2"
-              stroke={isChecked ? "#fff" : "none"}
-            />
-          </svg>
-          <input
-            type="checkbox"
-            onChange={() => {
-              setIsChecked(!isChecked);
-            }}
-            className=" absolute"
+        <svg
+          className={
+            `${item.completed ? " checkbox-active cursor-not-allowed " : ""}` +
+            " checkbox "
+          }
+          aria-hidden="true"
+          viewBox="0 0 15 11"
+          fill="none"
+        >
+          <path
+            d="M1 4.5L5 9L14 1"
+            strokeWidth="2"
+            stroke={item.completed ? " #fff " : " "}
           />
-          <div className="flex-1 cursor-pointer">{item.task}</div>
-        </label>
-      </div>
-    );
-  });
+        </svg>
+        <input
+          type="checkbox"
+          checked={isChecked[index]}
+          onChange={() => handleIsChecked(index)}
+          className="hidden absolute"
+        />
+        <div
+          className={
+            `${
+              item.completed
+                ? " line-through text-[#9394a5] cursor-not-allowed "
+                : ""
+            }` + "flex-1 cursor-pointer"
+          }
+        >
+          {item.task}
+        </div>
+      </label>
+      {!item.completed ? (
+        <div onClick={() => handleSingleTaskDelete(index)}>
+          <DeleteIcon />
+        </div>
+      ) : null}
+    </div>
+  ));
 
   useEffect(() => {
     localStorage.setItem("todoItem", JSON.stringify(todoArray));
     setDispayTodoArray([...todoArray]);
+    setIsChecked(new Array(todoArray.length).fill(false));
   }, [todoArray]);
 
   useEffect(() => {
@@ -151,7 +207,7 @@ function App() {
             />
           )}
         </div>
-        <div className="flex flex-col justify-center items-center -mt-36 md:w-[500px] min-w-[375px] mx-auto h-auto px-4 md:px-0  ">
+        <div className="flex flex-col justify-center items-center -mt-[160px] md:-mt-36 md:w-[500px] min-w-[375px] mx-auto h-auto px-4 md:px-0  ">
           <div className="w-full flex uppercase text-white justify-between items-center mb-8 text-3xl font-semibold">
             <p>todo</p>
             <div onClick={setTheme} className="cursor-pointer">
@@ -169,6 +225,7 @@ function App() {
               ></button>
               <input
                 type="text"
+                autoFocus
                 value={item}
                 onChange={handleInputChange}
                 className="w-full flex-1 outline-none bg-transparent border-0 text-[#777a92]"
@@ -178,14 +235,22 @@ function App() {
           </div>
 
           <div className="bg-[#25273c] w-full rounded-lg">
-            <div>{listTodoItems}</div>
+            <div className="max-h-[350px] customScroll overflow-y-scroll ">
+              {listTodoItems.length > 0 ? (
+                listTodoItems
+              ) : (
+                <div className="text-center text-white p-4 capitalize">
+                  <p>No tasks todo</p>
+                </div>
+              )}
+            </div>
             <div className="w-full flex p-3 justify-between capitalize space-x-5 text-xs text-[#9394a5]">
               <div>
                 <span>{activeTasksLeft.length}</span>
                 <span>{activeTasksLeft.length > 1 ? " items" : " item"}</span>
                 <span> left </span>
               </div>
-              <div className="flex space-x-2">
+              <div className="hidden space-x-2 md:flex">
                 <label>
                   <input
                     type="checkbox"
@@ -239,7 +304,58 @@ function App() {
               </div>
             </div>
           </div>
+
+          {/* display on small screens for responsiveness */}
+          <div className="flex space-x-2 mt-2 bg-[#25273c] text-[#9394a5] rounded-lg p-2 capitalize md:hidden">
+            <label>
+              <input
+                type="checkbox"
+                onChange={handleAllTask}
+                className="hidden absolute"
+              />
+              <span
+                className={
+                  `${checkShowAllTask ? " text-[#3a7bfd] " : ""}` +
+                  "cursor-pointer"
+                }
+              >
+                all
+              </span>
+            </label>
+
+            <label>
+              <input
+                type="checkbox"
+                onChange={handleActive}
+                className="hidden absolute"
+              />
+              <span
+                className={
+                  `${checkActive ? " text-[#3a7bfd] " : ""}` + "cursor-pointer"
+                }
+              >
+                active
+              </span>
+            </label>
+
+            <label>
+              <input
+                type="checkbox"
+                onChange={handleCompleted}
+                className="hidden absolute"
+              />
+              <span
+                className={
+                  `${checkCompleted ? " text-[#3a7bfd] " : ""}` +
+                  "cursor-pointer"
+                }
+              >
+                completed
+              </span>
+            </label>
+          </div>
         </div>
+        <ToastContainer autoClose={3000} position="top-center" theme="dark" />
       </main>
     </>
   );
