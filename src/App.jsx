@@ -131,11 +131,11 @@ function App() {
       onDragEnd={dragEnd}
       className={
         `${
-          item && item.completed
-            ? "cursor-not-allowed"
-            : "hover:bg-[#e4e5f1] hover:text-[#161722]"
+          item && !item.completed
+            ? "hover:bg-[#d8d8e9] hover:text-[#161722] "
+            : ""
         }` +
-        " text-[#fafafa] w-full p-3 border-b-[1px] border-[#777a92] inline-flex justify-between"
+        " text-[#fafafa] w-full p-3 border-b-[1px] border-[#777a92] inline-flex justify-between cursor-move"
       }
     >
       <label
