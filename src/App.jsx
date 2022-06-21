@@ -25,7 +25,6 @@ function App() {
   const dragItem = useRef(null);
   const dragOverItem = useRef(null);
   const dragStart = (e, position) => {
-    console.log(position);
     dragItem.current = position;
   };
   const dragEnter = (e, position) => {
@@ -54,7 +53,7 @@ function App() {
 
     const updatedTodoArray = todoArray.map((item, index) => {
       return index === position
-        ? { ...item, completed: true, active: false }
+        ? { ...item, completed: !item.completed, active: !item.active }
         : item;
     });
     setTodoArray(updatedTodoArray);
@@ -138,19 +137,11 @@ function App() {
         " text-[#fafafa] w-full p-3 border-b-[1px] border-[#777a92] inline-flex justify-between cursor-move"
       }
     >
-      <label
-        className={
-          `${item && item.completed ? " cursor-not-allowed " : ""}` +
-          "flex items-center space-x-2 "
-        }
-      >
+      <label className="flex items-center space-x-2 ">
         <svg
           className={
-            `${
-              item && item.completed
-                ? " checkbox-active cursor-not-allowed "
-                : ""
-            }` + " checkbox "
+            `${item && item.completed ? " checkbox-active  " : ""}` +
+            " checkbox "
           }
           aria-hidden="true"
           viewBox="0 0 15 11"
@@ -170,11 +161,8 @@ function App() {
         />
         <div
           className={
-            `${
-              item && item.completed
-                ? " line-through text-[#9394a5] cursor-not-allowed "
-                : ""
-            }` + "flex-1 cursor-pointer"
+            `${item && item.completed ? " line-through text-[#9394a5]" : ""}` +
+            "flex-1 cursor-pointer"
           }
         >
           {item && item.task.charAt(0).toUpperCase() + item.task.slice(1)}
