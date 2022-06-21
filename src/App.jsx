@@ -161,7 +161,7 @@ function App() {
         />
         <div
           className={
-            `${item && item.completed ? " line-through text-[#9394a5]" : ""}` +
+            `${item && item.completed ? " line-through text-[#9394a5] " : ""}` +
             "flex-1 cursor-pointer"
           }
         >
