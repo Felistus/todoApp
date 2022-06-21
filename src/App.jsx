@@ -177,7 +177,7 @@ function App() {
             }` + "flex-1 cursor-pointer"
           }
         >
-          {item && item.task}
+          {item && item.task.charAt(0).toUpperCase() + item.task.slice(1)}
         </div>
       </label>
       {item && !item.completed ? (
