@@ -1,27 +1,42 @@
 import "./App.css";
 import SunIcon from "./components/icons/SunIcon";
 import MoonIcon from "./components/icons/MoonIcon";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMemo } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import DeleteIcon from "./components/icons/DeleteIcon";
 
 function App() {
-  const existingTodoItems = JSON.parse(
-    localStorage.getItem("todoItem") || "[]"
-  );
   const [checkedTheme, setCheckedTheme] = useState(true);
   const [checkActive, setCheckActive] = useState(false);
   const [checkCompleted, setCheckCompleted] = useState(false);
   const [checkShowAllTask, setCheckShowAllTask] = useState(true);
   const [pageTheme, setPageTheme] = useState("dark");
   const [item, setItem] = useState("");
-  const [todoArray, setTodoArray] = useState([...existingTodoItems]);
+  const [todoArray, setTodoArray] = useState(
+    JSON.parse(localStorage.getItem("todoItem") || "[]")
+  );
   const [dispayTodoArray, setDispayTodoArray] = useState([...todoArray]);
   const [isChecked, setIsChecked] = useState(
     new Array(todoArray.length).fill(false)
   );
+
+  const dragItem = useRef(null);
+  const dragOverItem = useRef(null);
+  const dragStart = (e, position) => {
+    console.log(position);
+    dragItem.current = position;
+  };
+  const dragEnter = (e, position) => {
+    dragOverItem.current = position;
+  };
+  const dragEnd = () => {
+    const dragItemContent = dispayTodoArray[dragItem.current];
+    dispayTodoArray.splice(dragItem.current, 1);
+    dispayTodoArray.splice(dragOverItem.current, 0, dragItemContent);
+    setTodoArray(dispayTodoArray);
+  };
   function setTheme() {
     if (pageTheme === "dark") {
       setPageTheme("light");
@@ -110,9 +125,13 @@ function App() {
   const listTodoItems = dispayTodoArray.map((item, index) => (
     <div
       key={index}
+      draggable
+      onDragStart={(e) => dragStart(e, index)}
+      onDragEnter={(e) => dragEnter(e, index)}
+      onDragEnd={dragEnd}
       className={
         `${
-          item.completed
+          item && item.completed
             ? "cursor-not-allowed"
             : "hover:bg-[#e4e5f1] hover:text-[#161722]"
         }` +
@@ -121,14 +140,17 @@ function App() {
     >
       <label
         className={
-          `${item.completed ? " cursor-not-allowed " : ""}` +
+          `${item && item.completed ? " cursor-not-allowed " : ""}` +
           "flex items-center space-x-2 "
         }
       >
         <svg
           className={
-            `${item.completed ? " checkbox-active cursor-not-allowed " : ""}` +
-            " checkbox "
+            `${
+              item && item.completed
+                ? " checkbox-active cursor-not-allowed "
+                : ""
+            }` + " checkbox "
           }
           aria-hidden="true"
           viewBox="0 0 15 11"
@@ -137,7 +159,7 @@ function App() {
           <path
             d="M1 4.5L5 9L14 1"
             strokeWidth="2"
-            stroke={item.completed ? " #fff " : " "}
+            stroke={item && item.completed ? " #fff " : " "}
           />
         </svg>
         <input
@@ -149,16 +171,16 @@ function App() {
         <div
           className={
             `${
-              item.completed
+              item && item.completed
                 ? " line-through text-[#9394a5] cursor-not-allowed "
                 : ""
             }` + "flex-1 cursor-pointer"
           }
         >
-          {item.task}
+          {item && item.task}
         </div>
       </label>
-      {!item.completed ? (
+      {item && !item.completed ? (
         <div onClick={() => handleSingleTaskDelete(index)}>
           <DeleteIcon />
         </div>
@@ -209,7 +231,7 @@ function App() {
             />
           )}
         </div>
-        <div className="flex flex-col justify-center items-center -mt-[160px] md:-mt-36 md:w-[500px] min-w-[375px] mx-auto h-auto px-4 md:px-0  ">
+        <div className="flex flex-col justify-center items-center -mt-[160px] md:-mt-36 md:w-[500px] min-w-[300px] mx-auto h-auto px-4 md:px-0 pb-8 ">
           <div className="w-full flex uppercase text-white justify-between items-center mb-8 text-3xl font-semibold">
             <p>todo</p>
             <div onClick={setTheme} className="cursor-pointer">
@@ -355,6 +377,10 @@ function App() {
                 completed
               </span>
             </label>
+          </div>
+
+          <div className="text-center text-[#9394a5] p-2 my-2">
+            <p>Drag and Drop to reorder list</p>
           </div>
         </div>
         <ToastContainer autoClose={3000} position="top-center" theme="dark" />
